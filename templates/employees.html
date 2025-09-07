@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <nav class="col-md-2 sidebar d-none d-md-block">
+      <div class="px-3">
+        <h5>Team Dashboard</h5>
+        <ul class="nav flex-column">
+          <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="/properties">Properties</a></li>
+          <li class="nav-item"><a class="nav-link" href="#tasks">Tasks</a></li>
+          <li class="nav-item"><a class="nav-link" href="#queries">Tenant Queries</a></li>
+          <li class="nav-item"><a class="nav-link" href="#rent">Rent Collection</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/employees">Employees</a></li>
+        </ul>
+      </div>
+    </nav>
+    <main class="col-md-10 ms-sm-auto px-4">
+      <h2 class="pt-3">Employees</h2>
+      <div class="row">
+        <div class="col-md-5">
+          <h5>Add / Edit Employee</h5>
+          <form id="empForm">
+            <input type="hidden" name="id">
+            <input class="form-control mb-2" name="name" placeholder="Full name">
+            <input class="form-control mb-2" name="role" placeholder="Role (Admin, Manager, Support)">
+            <input class="form-control mb-2" name="permissions" placeholder="Permissions (comma separated)">
+            <button class="btn btn-primary">Save Employee</button>
+          </form>
+        </div>
+        <div class="col-md-7">
+          <h5>Employees List</h5>
+          <div id="employeesList">Loading…</div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+function loadEmployees(){
+  fetch('/api/employees').then(r=>r.json()).then(data=>{
+    const root = document.getElementById('employeesList');
+    root.innerHTML = data.map(e=>`<div class="card mb-2 p-2"><div class="d-flex justify-content-between"><div><strong>${e.name}</strong><div class="text-muted">${e.role} · ${e.permissions}</div></div><div><button class="btn btn-sm btn-outline-primary me-1" onclick="editEmp(${e.id})">Edit</button><button class="btn btn-sm btn-outline-danger" onclick="deleteEmp(${e.id})">Delete</button></div></div></div>`).join('');
+  });
+}
+loadEmployees();
+document.getElementById('empForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const fd = new FormData(this);
+  fetch('/api/employees',{method:'POST', body:fd}).then(()=>{ this.reset(); loadEmployees(); });
+});
+function editEmp(id){
+  fetch('/api/employees').then(r=>r.json()).then(data=>{
+    const e = data.find(x=>x.id===id);
+    const f = document.getElementById('empForm');
+    f.id.value = e.id; f.name.value = e.name; f.role.value = e.role; f.permissions.value = e.permissions;
+  });
+}
+function deleteEmp(id){
+  if(!confirm('Delete this employee?')) return;
+  fetch('/api/employees/'+id, {method:'DELETE'}).then(()=> loadEmployees());
+}
+</script>
+{% endblock %}

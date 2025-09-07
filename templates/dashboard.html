@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <nav class="col-md-2 sidebar d-none d-md-block">
+      <div class="px-3">
+        <h5>Team Dashboard</h5>
+        <ul class="nav flex-column">
+          <li class="nav-item"><a class="nav-link active" href="/dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="#properties">Properties</a></li>
+          <li class="nav-item"><a class="nav-link" href="#tasks">Tasks</a></li>
+          <li class="nav-item"><a class="nav-link" href="#queries">Tenant Queries</a></li>
+          <li class="nav-item"><a class="nav-link" href="#rent">Rent Collection</a></li>
+          <li class="nav-item"><a class="nav-link" href="#employees">Employees</a></li>
+          <li class="nav-item"><a class="nav-link" href="#settings">Settings</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="col-md-10 ms-sm-auto px-4">
+      <div class="d-flex justify-content-between flex-wrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h2>Dashboard</h2>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-6 col-md-3">
+          <div class="card p-3">
+            <div class="h6">Properties</div>
+            <div class="display-6">{{ props }}</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card p-3">
+            <div class="h6">Payments</div>
+            <div class="display-6">{{ pays }}</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card p-3">
+            <div class="h6">Queries</div>
+            <div class="display-6">{{ qs }}</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card p-3">
+            <div class="h6">Employees</div>
+            <div class="display-6">{{ emps }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <canvas id="paymentsChart" height="200"></canvas>
+        </div>
+        <div class="col-md-6">
+          <canvas id="propertiesChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="row mt-4" id="queries">
+        <div class="col-md-8">
+          <h5>Tenant Queries</h5>
+          <div id="queriesList">Loading…</div>
+        </div>
+        <div class="col-md-4">
+          <h5>Add Query</h5>
+          <form id="addQuery">
+            <input class="form-control mb-2" name="subject" placeholder="Subject">
+            <textarea class="form-control mb-2" name="message" placeholder="Message"></textarea>
+            <button class="btn btn-secondary">Add</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+// Payments chart
+fetch('/api/payments').then(r=>r.json()).then(data=>{
+  const amounts = data.slice(0,6).map(d=>d.amount || 0).reverse();
+  const labels = data.slice(0,6).map(d=>d.property).reverse();
+  new Chart(document.getElementById('paymentsChart'), {type:'bar',
+    data:{labels:labels, datasets:[{label:'Recent Payments (€)', data:amounts}]}
+  });
+});
+
+// Properties status chart
+fetch('/api/properties/status').then(r=>r.json()).then(data=>{
+  new Chart(document.getElementById('propertiesChart'), {type:'pie',
+    data:{labels:Object.keys(data),
+          datasets:[{data:Object.values(data)}]}
+  });
+});
+
+// Queries list
+function loadQueries(){
+  fetch('/api/queries').then(r=>r.json()).then(data=>{
+    const root = document.getElementById('queriesList');
+    root.innerHTML = data.map(q=>`<div class="card mb-2 p-2"><strong>${q.subject}</strong><div>${q.message}</div><div class="badge bg-warning">${q.status}</div></div>`).join('');
+  });
+}
+loadQueries();
+document.getElementById('addQuery')?.addEventListener('submit', function(e){
+  e.preventDefault();
+  const fd = new FormData(this);
+  fetch('/api/queries', {method:'POST', body:fd}).then(()=>{ this.reset(); loadQueries(); });
+});
+</script>
+{% endblock %}
+<script>
+function populatePropertySelect(){ fetch('/api/properties').then(r=>r.json()).then(data=>{ const sel=document.getElementById('paymentProperty'); if(sel) sel.innerHTML=data.map(p=>`<option value="${p.title}">${p.title} (${p.district})</option>`).join(''); }); }
+populatePropertySelect();
+document.getElementById('paymentForm')?.addEventListener('submit', function(e){ e.preventDefault(); const fd=new FormData(this); fetch('/api/payments',{method:'POST', body:fd}).then(()=>{ this.reset(); loadPaymentsHistory(); }); });
+function loadPaymentsHistory(){ fetch('/api/payments').then(r=>r.json()).then(data=>{ const root=document.getElementById('paymentsHistory'); if(!root) return; root.innerHTML=data.map(p=>`<div class="card mb-2 p-2"><div class="d-flex justify-content-between"><div><strong>${p.property}</strong><div class="text-muted">${p.tenant} · €${p.amount} · ${p.payment_type}</div></div><div><button class="btn btn-sm btn-outline-success me-1" onclick="confirmPayment(${p.id})">Confirm</button><button class="btn btn-sm btn-outline-danger" onclick="deletePayment(${p.id})">Delete</button></div></div><div class="mt-2"><span class="badge bg-${p.status==='Confirmed'?'success':'warning'}">${p.status}</span></div></div>`).join(''); }); }
+loadPaymentsHistory();
+function confirmPayment(id){ fetch('/api/payments/'+id, {method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({status:'Confirmed'})}).then(()=> loadPaymentsHistory()); }
+function deletePayment(id){ if(!confirm('Delete this payment?')) return; fetch('/api/payments/'+id, {method:'DELETE'}).then(()=> loadPaymentsHistory()); }
+</script>

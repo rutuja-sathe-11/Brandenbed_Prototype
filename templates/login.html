@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height:60vh">
+  <div class="card p-4" style="width:360px;">
+    <h4 class="mb-3">Sign in</h4>
+    {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+    <form method="post">
+      <input class="form-control mb-2" name="username" placeholder="Username" required>
+      <input class="form-control mb-2" name="password" placeholder="Password" type="password" required>
+      <button class="btn btn-primary w-100">Sign in</button>
+    </form>
+    <div class="mt-3 text-muted small">Default admin: <code>admin/adminpass</code> | staff: <code>staff/staffpass</code></div>
+  </div>
+</div>
+{% endblock %}

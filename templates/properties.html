@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <nav class="col-md-2 sidebar d-none d-md-block">
+      <div class="px-3">
+        <h5>Team Dashboard</h5>
+        <ul class="nav flex-column">
+          <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/properties">Properties</a></li>
+          <li class="nav-item"><a class="nav-link" href="#tasks">Tasks</a></li>
+          <li class="nav-item"><a class="nav-link" href="#queries">Tenant Queries</a></li>
+          <li class="nav-item"><a class="nav-link" href="#rent">Rent Collection</a></li>
+          <li class="nav-item"><a class="nav-link" href="/employees">Employees</a></li>
+          <li class="nav-item"><a class="nav-link" href="#settings">Settings</a></li>
+        </ul>
+      </div>
+    </nav>
+    <main class="col-md-10 ms-sm-auto px-4">
+      <h2 class="pt-3">Properties</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <h5>Add / Edit Property</h5>
+          <form id="propForm">
+            <input type="hidden" name="id">
+            <input class="form-control mb-2" name="title" placeholder="Title">
+            <input class="form-control mb-2" name="district" placeholder="District">
+            <input class="form-control mb-2" name="price" placeholder="Monthly Price">
+            <select class="form-control mb-2" name="status"><option>Available</option><option>Occupied</option></select>
+            <button class="btn btn-primary">Save Property</button>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <h5>Filters</h5>
+          <div class="mb-2"><input id="filterText" class="form-control" placeholder="Search by title or district"></div>
+          <div class="mb-2"><select id="filterStatus" class="form-control"><option value="">All statuses</option><option>Available</option><option>Occupied</option></select></div>
+          <button id="applyFilter" class="btn btn-secondary">Apply</button>
+        </div>
+      </div>
+      <hr>
+      <h5>Properties List</h5>
+      <div id="propertiesList">Loading…</div>
+    </main>
+  </div>
+</div>
+
+<script>
+function loadProperties(filters={}){
+  fetch('/api/properties').then(r=>r.json()).then(data=>{
+    let list = data.filter(p=>{
+      if(filters.status && p.status!==filters.status) return false;
+      if(filters.q){
+        const q = filters.q.toLowerCase();
+        if(!(p.title.toLowerCase().includes(q) || p.district.toLowerCase().includes(q))) return false;
+      }
+      return true;
+    });
+    const root = document.getElementById('propertiesList');
+    root.innerHTML = list.map(p=>`<div class="card mb-2 p-2"><div class="d-flex justify-content-between"><div><strong>${p.title}</strong><div class="text-muted">${p.district} · €${p.price}</div></div><div><button class="btn btn-sm btn-outline-primary me-1" onclick="editProp(${p.id})">Edit</button><button class="btn btn-sm btn-outline-danger" onclick="deleteProp(${p.id})">Delete</button></div></div><div class="mt-2"><span class="badge bg-${p.status==='Available'?'success':'secondary'}">${p.status}</span></div></div>`).join('');
+  });
+}
+loadProperties();
+document.getElementById('applyFilter').addEventListener('click',()=>{
+  loadProperties({status: document.getElementById('filterStatus').value, q: document.getElementById('filterText').value});
+});
+document.getElementById('propForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const fd = new FormData(this);
+  fetch('/api/properties',{method:'POST', body:fd}).then(()=>{ this.reset(); loadProperties(); });
+});
+function editProp(id){
+  fetch('/api/properties').then(r=>r.json()).then(data=>{
+    const p = data.find(x=>x.id===id);
+    const f = document.getElementById('propForm');
+    f.id.value = p.id; f.title.value = p.title; f.district.value = p.district; f.price.value = p.price; f.status.value = p.status;
+  });
+}
+function deleteProp(id){
+  if(!confirm('Delete this property?')) return;
+  fetch('/api/properties/'+id, {method:'DELETE'}).then(()=> loadProperties());
+}
+</script>
+{% endblock %}

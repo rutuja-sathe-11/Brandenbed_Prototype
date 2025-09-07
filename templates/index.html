@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block body %}
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="#"><img src="/static/logo.png" alt="logo" width="36" class="me-2">Brandenbed</a>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <li class="nav-item"><a class="nav-link" href="#properties">Properties</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about">About Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+        <li class="nav-item"><a class="btn btn-outline-primary ms-2" href="/dashboard">Team Dashboard</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <h1 class="display-5">Find comfortable homes across Berlin</h1>
+        <p class="lead">Trusted property leasing and management — simple, quick, and reliable.</p>
+        <div class="d-flex gap-2">
+          <a href="#properties" class="btn btn-primary btn-lg">Browse Properties</a>
+          <a href="#contact" class="btn btn-outline-secondary btn-lg">Contact Us</a>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-block">
+        <img src="/static/hero.png" alt="hero" class="img-fluid">
+      </div>
+    </div>
+    <div class="row mt-4 text-center">
+      <div class="col-6 col-md-3">
+        <div class="quick-stat">500+<div class="text-muted">Properties Sold</div></div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="quick-stat">1200+<div class="text-muted">Happy Clients</div></div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="quick-stat">18+<div class="text-muted">Years Experience</div></div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="quick-stat">8+<div class="text-muted">Districts in Berlin</div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="properties" class="py-5">
+  <div class="container">
+    <h3>Featured Properties</h3>
+    <div class="row gy-3">
+      <div class="col-md-4">
+        <div class="card">
+          <img src="/static/property1.jpg" class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title">Sunny 2BHK in Mitte</h5>
+            <p class="card-text">Modern, close to transport.</p>
+            <a href="#" class="btn btn-sm btn-primary">View</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <img src="/static/property2.jpg" class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title">Cozy Studio in Kreuzberg</h5>
+            <p class="card-text">Quiet neighborhood, great light.</p>
+            <a href="#" class="btn btn-sm btn-primary">View</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <img src="/static/property3.jpg" class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title">Family Flat in Prenzlauer Berg</h5>
+            <p class="card-text">Spacious and child-friendly.</p>
+            <a href="#" class="btn btn-sm btn-primary">View</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="py-5 bg-light">
+  <div class="container">
+    <h3>About Us</h3>
+    <p>Brandenbed Living Spaces manages properties across Berlin with a focus on tenant satisfaction and transparent pricing.</p>
+    <div class="row">
+      <div class="col-md-4"><h5>Core Values</h5><ul><li>Transparency</li><li>Responsiveness</li><li>Quality</li></ul></div>
+      <div class="col-md-4"><h5>Services</h5><ul><li>Leasing</li><li>Property Management</li><li>Rent Collection</li></ul></div>
+      <div class="col-md-4"><h5>Contact</h5><p>Friedrichstraße 155, 10117 Berlin<br>contact@brandenbedlivingspaces.com</p></div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact" class="py-4 bg-white border-top">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div>© Brandenbed Living Spaces</div>
+    <div>Follow us: <a href="#">LinkedIn</a> · <a href="#">Instagram</a></div>
+  </div>
+</footer>
+{% endblock %}
